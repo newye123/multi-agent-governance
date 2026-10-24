@@ -1,0 +1,122 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: py${{ matrix.python }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: 自检（基线必须绿）
+        run: python -m unittest discover -s tests -v
+
+      # ------------------------------------------------------------------
+      # 负控：守卫必须自证会红。
+      # 每一发都是「注入已知破坏 → 必须 FAILED → 还原 → 核 sha256」。
+      # 任何一发变绿，构建失败 —— 守卫自己也要被守卫。
+      # ------------------------------------------------------------------
+      - name: 负控 1 — 破坏案例节标题
+        shell: bash
+        run: |
+          set -u
+          F=cases/03-two-writers-one-tree.md
+          B=$(sha256sum "$F" | cut -d' ' -f1)
+          cp "$F" "$RUNNER_TEMP/c03.bak"
+          sed -i 's/^## 取证$/## 取证材料（改坏了）/' "$F"
+          if python -m unittest discover -s tests >/dev/null 2>&1; then
+            echo "::error::负控 1 没有变红 —— 节标题守卫是假绿"
+            exit 1
+          fi
+          cp "$RUNNER_TEMP/c03.bak" "$F"
+          A=$(sha256sum "$F" | cut -d' ' -f1)
+          [ "$B" = "$A" ] || { echo "::error::负控 1 还原失败"; exit 1; }
+          echo "负控 1 OK：注入后红，还原 sha256 一致"
+
+      - name: 负控 2 — 塞一个脱敏黑名单里的词
+        shell: bash
+        run: |
+          set -u
+          F=cases/01-background-agent-killed.md
+          B=$(sha256sum "$F" | cut -d' ' -f1)
+          cp "$F" "$RUNNER_TEMP/n2.bak"
+          # 注入串从测试文件里取，避免本工作流自己成为泄露源
+          W=$(python -c "import re,sys;print(re.search(r'BANNED = \[(.*?)\]', open('tests/test_repo.py',encoding='utf-8').read(), re.S).group(1).split(',')[0].strip().strip('\"'))")
+          printf '\n补充：%s 的客户稿。\n' "$W" >> "$F"
+          if python -m unittest discover -s tests >/dev/null 2>&1; then
+            echo "::error::负控 2 没有变红 —— 脱敏守卫是假绿"
+            exit 1
+          fi
+          cp "$RUNNER_TEMP/n2.bak" "$F"
+          A=$(sha256sum "$F" | cut -d' ' -f1)
+          [ "$B" = "$A" ] || { echo "::error::负控 2 还原失败"; exit 1; }
+          echo "负控 2 OK"
+
+      - name: 负控 3 — 把索引里的链接改错一个字符
+        shell: bash
+        run: |
+          set -u
+          F=cases/README.md
+          B=$(sha256sum "$F" | cut -d' ' -f1)
+          cp "$F" "$RUNNER_TEMP/n3.bak"
+          sed -i 's|02-missing-script\.md|02-missing-scripts.md|' "$F"
+          if python -m unittest discover -s tests >/dev/null 2>&1; then
+            echo "::error::负控 3 没有变红 —— 链接守卫是假绿"
+            exit 1
+          fi
+          cp "$RUNNER_TEMP/n3.bak" "$F"
+          A=$(sha256sum "$F" | cut -d' ' -f1)
+          [ "$B" = "$A" ] || { echo "::error::负控 3 还原失败"; exit 1; }
+          echo "负控 3 OK"
+
+      - name: 负控 4 — 资源清单漏登记
+        shell: bash
+        run: |
+          set -u
+          F=SKILL.md
+          B=$(sha256sum "$F" | cut -d' ' -f1)
+          cp "$F" "$RUNNER_TEMP/n4.bak"
+          sed -i '/prior-art\.md/d' "$F"
+          if python -m unittest discover -s tests >/dev/null 2>&1; then
+            echo "::error::负控 4 没有变红 —— 资源清单守卫是假绿"
+            exit 1
+          fi
+          cp "$RUNNER_TEMP/n4.bak" "$F"
+          A=$(sha256sum "$F" | cut -d' ' -f1)
+          [ "$B" = "$A" ] || { echo "::error::负控 4 还原失败"; exit 1; }
+          echo "负控 4 OK"
+
+      - name: 负控 5 — frontmatter 去掉 license
+        shell: bash
+        run: |
+          set -u
+          F=SKILL.md
+          B=$(sha256sum "$F" | cut -d' ' -f1)
+          cp "$F" "$RUNNER_TEMP/n5.bak"
+          sed -i '/^license: NC-1.0/d' "$F"
+          if python -m unittest discover -s tests >/dev/null 2>&1; then
+            echo "::error::负控 5 没有变红 —— frontmatter 守卫是假绿"
+            exit 1
+          fi
+          cp "$RUNNER_TEMP/n5.bak" "$F"
+          A=$(sha256sum "$F" | cut -d' ' -f1)
+          [ "$B" = "$A" ] || { echo "::error::负控 5 还原失败"; exit 1; }
+          echo "负控 5 OK"
+
+      - name: 还原后基线必须重新变绿
+        run: python -m unittest discover -s tests

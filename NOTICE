@@ -1,0 +1,48 @@
+# 版权与归属声明 / Copyright & Attribution
+
+## 著作权人
+
+**yt** — GitHub [@newye123](https://github.com/newye123)
+
+## 作品
+
+`multi-agent-governance` — 多 agent 协作的派工与治理方法论，含 `SKILL.md`、`references/`、`cases/` 与全部文档。
+
+## 许可
+
+**非商业使用许可 1.0（NC-1.0）** — 见 [LICENSE](LICENSE)。
+
+一句话：**可以免费用，不能拿去赚钱；转载和修改必须署名并保留本声明。**
+
+## 引用格式
+
+学术或公开引用请使用：
+
+```
+yt (@newye123). multi-agent-governance: 多 agent 协作的派工与治理.
+2026. https://github.com/newye123/multi-agent-governance
+```
+
+中文行文可写作：「参考 yt 的 multi-agent-governance（github.com/newye123/multi-agent-governance）」。
+
+## 第三方内容
+
+本作品引用、借鉴了以下公开成果，均已在正文对应位置标注：
+
+- `obra/superpowers` — subagent-driven-development 的双轴验收、修复轮次上限、无共享状态才并行
+- `crewAIInc/crewAI` — 产物落成可交接对象
+- `microsoft/autogen` — 终止条件（termination conditions）制度化
+- `FoundationAgents/MetaGPT` — 反例：审核环节一旦"可选"就会退化成没有
+- `ruvnet/claude-flow` — 反例：机制清单越长，越容易把"声明了治理"当成"有治理"
+- Anthropic《Built a multi-agent research system》— 委派必给目标/输出格式/工具指引/任务边界
+- 三省六部制 — 唐代官制史实，出处见 `references/prior-art.md`
+
+上述第三方内容各自的权利归其原作者，不在本作品的著作权范围内。
+
+## 案例的脱敏范围
+
+`cases/` 中的案例来自真实项目。已移除：公司名、品牌名、产品型号、SKU、客户文案、凭据、服务器地址。
+
+保留：`file:line`、命令原式、真实退出码、时间线、代码片段。
+
+理由：案例的可核验性建立在后者上；去掉前者不影响任何人，去掉后者会让案例退化成传闻。

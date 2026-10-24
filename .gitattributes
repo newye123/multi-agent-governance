@@ -1,0 +1,11 @@
+# 统一换行，避免 Windows 上写出 CRLF 让字节级断言失配
+* text=auto eol=lf
+
+*.md   text eol=lf
+*.py   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+
+# 这些不需要归一
+*.png  binary
+*.jpg  binary
