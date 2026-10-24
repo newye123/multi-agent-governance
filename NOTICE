@@ -27,17 +27,19 @@ yt (@newye123). multi-agent-governance: 多 agent 协作的派工与治理.
 
 ## 第三方内容
 
-本作品引用、借鉴了以下公开成果，均已在正文对应位置标注：
+本作品引用、借鉴了以下公开成果。**借了什么、改了什么、拒了什么，逐条写在
+`references/prior-art.md` 里**，此处只列名单与许可归属：
 
-- `obra/superpowers` — subagent-driven-development 的双轴验收、修复轮次上限、无共享状态才并行
-- `crewAIInc/crewAI` — 产物落成可交接对象
-- `microsoft/autogen` — 终止条件（termination conditions）制度化
-- `FoundationAgents/MetaGPT` — 反例：审核环节一旦"可选"就会退化成没有
-- `ruvnet/claude-flow` — 反例：机制清单越长，越容易把"声明了治理"当成"有治理"
-- Anthropic《Built a multi-agent research system》— 委派必给目标/输出格式/工具指引/任务边界
-- 三省六部制 — 唐代官制史实，出处见 `references/prior-art.md`
+- `crewAIInc/crewAI` — 角色化 agent（`role / goal / backstory`）与 hierarchical 流程
+- `microsoft/autogen` — 可对话 agent、`GroupChat` 由 manager 决定下一个发言者
+- `FoundationAgents/MetaGPT` — `Code = SOP(Team)`、角色按 SOP 产出交付物、共享消息池
+- `obra/superpowers` — 用 git worktree 并行开发、子 agent 驱动开发
+- `ruvnet/claude-flow` — swarm / hive-mind 编排层
+- Anthropic 关于多 agent 系统的工程博客 — 上下文隔离与委派的成本
+- 三省六部制 — 隋唐官制史实（中书拟令 / 门下封驳 / 尚书六部 / 御史监察 / 吏部考功）
 
 上述第三方内容各自的权利归其原作者，不在本作品的著作权范围内。
+本作品**没有复制上述项目的代码**，只在方法论层面借鉴并对差异作出说明。
 
 ## 案例的脱敏范围
 

@@ -55,9 +55,20 @@ jobs:
           F=cases/01-background-agent-killed.md
           B=$(sha256sum "$F" | cut -d' ' -f1)
           cp "$F" "$RUNNER_TEMP/n2.bak"
-          # 注入串从测试文件里取，避免本工作流自己成为泄露源
-          W=$(python -c "import re,sys;print(re.search(r'BANNED = \[(.*?)\]', open('tests/test_repo.py',encoding='utf-8').read(), re.S).group(1).split(',')[0].strip().strip('\"'))")
-          printf '\n补充：%s 的客户稿。\n' "$W" >> "$F"
+          # 注入串从测试文件里取，避免本工作流自己成为泄露源。
+          # 全程在 python 里读写，不经过 shell 变量：Windows 上 python 的 stdout
+          # 默认走 locale 编码，中文 print 出来会变成空串，注入就成了空注入
+          # —— 守卫不红，负控假绿。第一版就是这么挂的。
+          python - <<'PY'
+          import re
+          src = open("tests/test_repo.py", encoding="utf-8").read()
+          word = re.search(r"BANNED = \[(.*?)\]", src, re.S).group(1).split(",")[0]
+          word = word.strip().strip('"')
+          assert word, "取不到禁用词，负控无法注入"
+          with open("cases/01-background-agent-killed.md", "a", encoding="utf-8") as fh:
+              fh.write("\n补充：" + word + " 的客户稿。\n")
+          print("injected len =", len(word))
+          PY
           if python -m unittest discover -s tests >/dev/null 2>&1; then
             echo "::error::负控 2 没有变红 —— 脱敏守卫是假绿"
             exit 1
